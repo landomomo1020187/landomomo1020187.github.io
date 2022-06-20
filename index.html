@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Ordering</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div id="app">
+     <div class="title">Movie Ordering</div>
+     <div class="movie" @wheel.prevent="wheel($event)">
+        <!--後台-->
+        <div class="backstage">
+            <label style="color:white;">Editing:
+                <input v-model="editing" type="checkbox"/>
+            </label>
+            <!--打勾即出現後台-->
+            <div class="controlStock" v-for="movie in movies" :class="{showMode: ! editing}">
+                <label style="color:green">{{movie.name}}</label>
+                <input type="text" v-model.number.lazy="movie.stock"/>
+            </div>
+            
+        </div>
+        <!--搜尋-->
+        <div class="search">
+            Search key
+            <input id="inputKey" type="text"/>
+            <button class="search" v-on:click="enterToSearch">Search</button>
+        </div>
+        <div class="cards">
+            <div class="card" v-for="movie in movies" v-if="movie.name.includes(key_word)">
+                <div class="left">
+                  <!--<img :src="movie.cover" style="width:200px"/> --> 
+                  <div class="cover" :style="bgcss(movie.cover)"></div>
+               </div>
+               <div class="right">
+                   <h2> {{ movie.name}}</h2>
+                   <h4> {{ movie.type}}</h4>
+                   <p v-html="movie.description"></p>
+                   <div class="price">$ {{movie.price}}</div>
+                   <button class="add" @click="singleAddCart(movie, $event)">+ Add to Cart</button>
+                   <br/>
+                   <br/>
+                   <label>
+                        QTY
+                        <input type="text" size="4" v-model.number.lazy="movie.AddQTY">
+                        <button class="addQTY" @click="addCart(movie, $event)">Add to Cart</button>
+                        <label class="overStock" :class="{showOverStock: !movie.overStock}">庫存不夠 剩餘庫存{{movie.stock}}</label>
+                   </label>
+                </div>            
+            </div>
+            
+            
+        </div>
+     </div>
+     <!--新增點選時的動畫-->
+     <div class="buybox" :style="bgcss(currentMovie.cover)" v-if="currentMovie"></div>
+     <!-- cart Control-->
+     <div class="fixed-control" @click="isCartOpen=!isCartOpen">
+         <p><i class="fa fa-shopping-cart"></i>
+        <span>{{totalMovie}}</span></p>
+     </div>
+    
+     <div class="control" v-if="isCartOpen">
+        <div class="panel">
+            <h2> Movie Cart</h2>
+            <ul>
+                <li v-for="(movie) in cart" v-if="!cartMovieList.includes(movie)">
+                    {{cartMovieListAdd(movie)}}
+                </li>
+                <!--讓重複電影只出現一次-->
+                <li v-for="(movie) in cartMovieList">
+                    <!--加減按鈕-->
+                    <input class="addBtn" type="button" value="+" v-on:click="addQTYButton(movie)">
+                    <div class="qty">{{movie.totalQTY}}</div>
+                    <input class="subBtn" type="button" value="-" v-on:click="subQTYButton(movie)">
+
+                    <div class="thumbnail" :style="bgcss(movie.cover)" ></div>
+                    <h3>{{movie.name}}
+                        <div class="price">${{movie.price}}</div>
+                    </h3>
+                    <!--刪除項目-->
+                    <input class="delBtn" type="button" value="Delete" v-on:click="deleteMovie(movie)">
+                </li>
+                <li v-if="!cart.length">
+                    <h3>Empty Cart</h3>
+                </li>
+            </ul>
+            <hr>
+            <h2>$ {{totalPrice}}</h2>
+            <input class="ClearCart" type="button" value="Clear Cart" v-on:click="clearCart">
+            <input class="CheckOut" type="button" value="Check Out" v-on:click="isCheckOutOpen=!isCheckOutOpen">
+            
+        </div>
+     </div>
+     <div class="checkOutContainer" v-if="isCheckOutOpen">
+        <i class="fa fa-times" v-on:click="isCheckOutOpen=!isCheckOutOpen"></i>
+        <div class="checkOut">
+            <p>
+                <h2>
+                Checkout
+                <br>
+                You order {{cart.length}} movies.
+                <br>
+                Total:${{totalPrice}}
+                </h2>
+            </p>
+        </div>
+     </div>
+
+    </div>
+
+    <!-- script list-->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.11/vue.min.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js'></script>
+
+<script src="./script.js"></script>
+
+</body>
+</html>
